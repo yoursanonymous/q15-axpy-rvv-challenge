@@ -1,0 +1,33 @@
+name: Q15 AXPY RVV CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-24.04
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-riscv64-linux-gnu qemu-user
+
+    - name: Build
+      run: make all_rv64
+
+    - name: Run Benchmark
+      run: |
+        set -o pipefail
+        make run_rv64 | tee benchmark_output.txt
+
+    - name: Upload Results
+      uses: actions/upload-artifact@v4
+      with:
+        name: benchmark-results
+        path: benchmark_output.txt
